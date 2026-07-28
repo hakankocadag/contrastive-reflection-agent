@@ -1,7 +1,7 @@
 from typing import Any
 
 from .prompts import build_system_prompt
-from .schemas import StudentAgentOutput
+from .schemas import PromptRule, StudentAgentOutput
 
 
 class StudentAgent:
@@ -13,7 +13,7 @@ class StudentAgent:
     async def analyze(
         self,
         graph_data: dict[str, Any],
-        additional_rules: list[str] | None = None,
+        additional_rules: list[PromptRule] | None = None,
     ) -> StudentAgentOutput:
         """Analyzes graph data and returns validated structured output."""
 
