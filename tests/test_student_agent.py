@@ -1,4 +1,6 @@
 import asyncio
+import json
+from pathlib import Path
 from typing import Any
 
 from student_agent.agent import StudentAgent
@@ -29,13 +31,18 @@ class FakeLLMClient:
         }
 
 
+def load_mock_graph() -> dict[str, Any]:
+    """Loads the temporary graph fixture used by the tests."""
+
+    graph_path = Path(__file__).parent / "fixtures" / "mock_graph.json"
+
+    with graph_path.open(encoding="utf-8") as file:
+        return json.load(file)
+
+
 def test_student_agent_returns_structured_output() -> None:
     agent = StudentAgent(client=FakeLLMClient())
-
-    graph_data = {
-        "file_id": "sample-001",
-        "functions": [],
-    }
+    graph_data = load_mock_graph()
 
     result = asyncio.run(
         agent.analyze(
@@ -48,4 +55,5 @@ def test_student_agent_returns_structured_output() -> None:
     assert len(result.detected_calls) == 1
     assert result.detected_calls[0].caller == "main"
     assert result.detected_calls[0].callee == "calculate_total"
+    assert result.detected_calls[0].line_number == 8
     assert result.reported_errors == []

@@ -1,0 +1,19 @@
+{
+  "file_id": "sample-001",
+  "functions": [
+    {
+      "name": "main",
+      "calls": [
+        {
+          "callee": "calculate_total",
+          "line_number": 8
+        }
+      ]
+    },
+    {
+      "name": "calculate_total",
+      "calls": []
+    }
+  ],
+  "dependencies": []
+}
