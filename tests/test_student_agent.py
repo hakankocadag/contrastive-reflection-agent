@@ -3,22 +3,29 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from student_agent.agent import StudentAgent
+from student_agent.config import LLMConfig
 from student_agent.schemas import PromptRule, StudentAgentOutput
 
 
 class FakeLLMClient:
-    """Temporary asynchronous client used for testing."""
+    """Temporary asynchronous client used for normal tests."""
 
     def __init__(self) -> None:
         self.received_prompts: list[str] = []
+        self.received_configs: list[LLMConfig] = []
 
     async def analyze(
         self,
+        *,
         graph_data: dict[str, Any],
         system_prompt: str,
+        config: LLMConfig,
     ) -> dict[str, Any]:
         self.received_prompts.append(system_prompt)
+        self.received_configs.append(config)
 
         return {
             "detected_calls": [
@@ -28,6 +35,48 @@ class FakeLLMClient:
                     "line_number": 8,
                 }
             ],
+            "reported_errors": [],
+        }
+
+
+class RetryLLMClient:
+    """Fails once and succeeds on the second attempt."""
+
+    def __init__(self) -> None:
+        self.attempts = 0
+
+    async def analyze(
+        self,
+        *,
+        graph_data: dict[str, Any],
+        system_prompt: str,
+        config: LLMConfig,
+    ) -> dict[str, Any]:
+        self.attempts += 1
+
+        if self.attempts == 1:
+            raise ConnectionError("Temporary connection error")
+
+        return {
+            "detected_calls": [],
+            "reported_errors": [],
+        }
+
+
+class SlowLLMClient:
+    """Simulates an API request that exceeds the timeout limit."""
+
+    async def analyze(
+        self,
+        *,
+        graph_data: dict[str, Any],
+        system_prompt: str,
+        config: LLMConfig,
+    ) -> dict[str, Any]:
+        await asyncio.sleep(0.1)
+
+        return {
+            "detected_calls": [],
             "reported_errors": [],
         }
 
@@ -72,6 +121,7 @@ def test_student_agent_uses_latest_rule_version() -> None:
     )
 
     prompt = client.received_prompts[0]
+    received_config = client.received_configs[0]
 
     assert isinstance(result, StudentAgentOutput)
     assert len(result.detected_calls) == 1
@@ -81,6 +131,9 @@ def test_student_agent_uses_latest_rule_version() -> None:
     assert "Ignore all Python built-in function calls." in prompt
     assert "Ignore some built-in function calls." not in prompt
     assert "Do not report recursive calls as circular dependencies." in prompt
+
+    assert received_config.temperature == 0.0
+    assert received_config.max_output_tokens == 800
 
 
 def test_student_agent_is_stateless() -> None:
@@ -126,3 +179,41 @@ def test_student_agent_is_stateless() -> None:
 
     assert "Second analysis rule." in second_prompt
     assert "First analysis rule." not in second_prompt
+
+
+def test_student_agent_retries_after_connection_error() -> None:
+    client = RetryLLMClient()
+
+    config = LLMConfig(
+        timeout_seconds=1.0,
+        max_retries=1,
+    )
+
+    agent = StudentAgent(
+        client=client,
+        config=config,
+    )
+
+    result = asyncio.run(
+        agent.analyze(graph_data=load_mock_graph())
+    )
+
+    assert isinstance(result, StudentAgentOutput)
+    assert client.attempts == 2
+
+
+def test_student_agent_stops_after_timeout() -> None:
+    config = LLMConfig(
+        timeout_seconds=0.01,
+        max_retries=0,
+    )
+
+    agent = StudentAgent(
+        client=SlowLLMClient(),
+        config=config,
+    )
+
+    with pytest.raises(RuntimeError, match="failed after 1"):
+        asyncio.run(
+            agent.analyze(graph_data=load_mock_graph())
+        )

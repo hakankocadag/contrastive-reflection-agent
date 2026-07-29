@@ -55,10 +55,31 @@ yeni bir system prompt oluşturarak stateless çalışmaktadır.
 
 [View Week 2 Documentation — English & Türkçe](docs/week-2/README.md)
 
-````markdown
+### Week 3 — API Wrapper, Configuration and Reliability
+
+During Week 3, the Student Agent was converted into a clean,
+provider-independent API wrapper.
+
+Centralized model configuration, timeout handling, retry behavior,
+external rule validation, and JSON-compatible output support were added.
+
+Üçüncü haftada Öğrenci Ajan, temiz ve sağlayıcıdan bağımsız bir API
+wrapper hâline getirildi.
+
+Merkezi model ayarları, zaman aşımı, tekrar deneme, dışarıdan gelen
+kuralların doğrulanması ve JSON uyumlu çıktı desteği eklendi.
+
+[View Week 3 Documentation — English & Türkçe](docs/week-3/README.md)
+
 ## Testing
 
 Run the tests with:
 
 ```bash
 python -m pytest -v
+
+````markdown
+Current result:
+
+```text
+6 passed
