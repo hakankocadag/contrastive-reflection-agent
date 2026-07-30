@@ -3,7 +3,9 @@ import os
 from typing import Dict, Any
 from dotenv import load_dotenv
 import google.generativeai as genai
+import re
 from prompt_manager import PromptManager
+from mock_database import MockDatabase
 
 class TeacherAgentAPI:
     def __init__(self, api_key: str = None, base_url: str = None):
@@ -44,34 +46,56 @@ class TeacherAgentAPI:
         
         response = await self.call_model(prompt)
         
+        
+        # Extract the specific rule/prompt update
+        prompt_update = self.extract_prompt_update(response)
+        
         # Simulated parsed response
         return {
             "status": "success",
             "evaluation_result": response,
+            "extracted_rule": prompt_update,
             "generated_prompt": prompt
         }
+        
+    def extract_prompt_update(self, evaluation_text: str) -> str:
+        """
+        Parses the LLM output to extract just the recommended prompt update (the new rule).
+        """
+        # Look for the "Önerilen Prompt Güncellemesi:" section
+        match = re.search(r"Önerilen Prompt Güncellemesi:\s*(.*)", evaluation_text, re.DOTALL | re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return "No specific rule extracted."
 
 async def main():
     agent = TeacherAgentAPI()
+    db = MockDatabase()
     
-    # Mock data to test the integration
-    import json
-    mock_student_output = json.dumps({
-        "detected_calls": [
-            {"caller": "main", "callee": "calculate_loss", "line_number": 10},
-            {"caller": "main", "callee": "non_existent_function", "line_number": 15}
-        ]
-    }, indent=2)
+    print("--- 2. Hafta Entegrasyon Testi Başlıyor ---")
     
-    mock_contrastive_evidence = [
-        "Gerçek 'graph.json' dosyasında 'non_existent_function' adında bir fonksiyon çağrısı bulunmamaktadır.",
-        "'main' fonksiyonu sadece 'calculate_loss' fonksiyonunu çağırmalıdır."
-    ]
-    
-    result = await agent.evaluate_student_output(mock_student_output, mock_contrastive_evidence)
-    
-    print("\n--- Teacher Agent Değerlendirme Sonucu ---\n")
-    print(result["evaluation_result"])
+    records = await db.get_unprocessed_evaluations()
+    if not records:
+        print("İşlenecek kayıt bulunamadı.")
+        return
+        
+    for record in records:
+        print(f"\nİncelenen Dosya: {record['file_id']} (Log ID: {record['log_id'][:8]}...)")
+        
+        result = await agent.evaluate_student_output(
+            student_output=record["student_output"],
+            contrastive_evidence_list=record["contrastive_evidence"]
+        )
+        
+        print(f" LLM Ham Değerlendirmesi:\n  {result['evaluation_result'].replace(chr(10), chr(10)+'  ')}")
+        
+        rule = result.get('extracted_rule')
+        if rule and rule != "No specific rule extracted.":
+            print(f"\n [BAŞARILI] Çıkarılan Yeni Kural (Prompt Update):\n  >>> {rule}")
+            await db.update_evaluation_status(record['log_id'], "processed", teacher_feedback=rule)
+        else:
+            print("\n [BAŞARISIZ] Kural çıkarılamadı.")
+            await db.update_evaluation_status(record['log_id'], "failed_to_extract_rule")
 
 if __name__ == "__main__":
     asyncio.run(main())

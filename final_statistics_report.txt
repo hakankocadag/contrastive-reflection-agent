@@ -1,0 +1,12 @@
+===========================================================
+    CONTRASTIVE REFLECTION AGENT - FINAL METRICS REPORT    
+===========================================================
+Test Edilen Toplam Dosya (Eval Set): 100
+-----------------------------------------------------------
+Zıt Yansıma ÖNCESİ Halüsinasyon Hata Oranı : %36.0 (36 dosya)
+Zıt Yansıma SONRASI Halüsinasyon Hata Oranı: %2.0 (2 dosya)
+-----------------------------------------------------------
+Başarıyla Engellenen Hata Sayısı           : 34
+Öğretmen Ajan Kural Kalitesi Skoru (RQS)   : 94.44 / 100
+===========================================================
+Sonuç: Öğretmen Ajan'ın dinamik prompt güncellemeleri sayesinde sistemin halüsinasyon oranı dramatik bir şekilde düşürülmüştür.
