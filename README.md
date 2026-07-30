@@ -4,7 +4,7 @@ Bu proje, büyük dil modellerinin (LLM) yazılım kod tabanlarını analiz eder
 
 Bu branch (Hakan-Kocadağ), geliştirme ekibinin **Hakan Kocadağ**'a atanan ilk 3 haftalık görevlerinin tamamlanmış halini içermektedir.
 
-## 🚀 Yapılan Geliştirmeler
+## Yapılan Geliştirmeler
 
 ### 1. Hafta (Temellerin Atılması)
 1. **Öğretmen Ajan API Entegrasyonu (`teacher_agent.py`)**
@@ -33,7 +33,7 @@ Gerekli Python kütüphanelerini yüklemek için:
 pip install -r requirements.txt
 ```
 
-## 🔑 Ortam Değişkenleri (.env)
+## Ortam Değişkenleri (.env)
 
 Projenin ana dizininde bir `.env` dosyası oluşturun ve içerisine kendi Gemini API anahtarınızı ekleyin:
 
@@ -42,7 +42,7 @@ GEMINI_API_KEY=sizin_api_anahtariniz_buraya
 GEMINI_MODEL_NAME=gemini-2.5-flash
 ```
 
-## 🛠️ Kullanım ve Test
+## Kullanım ve Test
 
 Proje şu anda, takımın geri kalanının görevleri tamamlanana kadar **sahte (mock) verilerle** izole bir biçimde test edilebilir durumdadır.
 
