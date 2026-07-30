@@ -25,7 +25,7 @@ Bu branch (Hakan-Kocadağ), geliştirme ekibinin **Hakan Kocadağ**'a atanan ilk
    - Öğretmen ajandan gelen kuralların sisteme kazandırdığı başarı (Rule Quality Score) hesaplandı ve konsola döküldü.
    - Sonuçlar `final_statistics_report.txt` dosyasına otomatik raporlanacak şekilde kurgulandı.
 
-## ⚙️ Kurulum
+## Kurulum
 
 Gerekli Python kütüphanelerini yüklemek için:
 
