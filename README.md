@@ -1,4 +1,4 @@
-# Contrastive Reflection Agent (Hakan Kocadağ - 1, 2 ve 3. Hafta Görevleri)
+# AI-Driven Code Analysis & Self-Correcting Framework (Hakan Kocadağ)
 
 Bu proje, büyük dil modellerinin (LLM) yazılım kod tabanlarını analiz ederken ürettikleri halüsinasyonları otonom bir şekilde giderebilen, çok ajanlı (multi-agent) bir test ve optimizasyon framework'ü inşa etmeyi amaçlamaktadır.
 
